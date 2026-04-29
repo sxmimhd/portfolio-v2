@@ -4,11 +4,44 @@ import { categoryOrder, projectsData, type ProjectProgress } from "./projectsdat
 export default function Portfolio() {
   const [bgRatio, setBgRatio] = React.useState(1.2);
   const [isMobile, setIsMobile] = React.useState(false);
-  const [categoryIndex, setCategoryIndex] = React.useState(0);
+  const [categoryIndex, setCategoryIndex] = React.useState(1);
   const [progressFilter, setProgressFilter] = React.useState<ProjectProgress>("finished");
   const [activeProjectIndex, setActiveProjectIndex] = React.useState(0);
   const [isProjectModalOpen, setIsProjectModalOpen] = React.useState(false);
-
+  const [selectedGalleryImage, setSelectedGalleryImage] = React.useState<string | null>(null);
+  const renderDetails = (text: string) => {
+    return text.split("\n").map((line, lineIndex) => (
+      <span key={lineIndex}>
+        {line.split(" ").map((word, i) => {
+          const isLink =
+            word.startsWith("http") ||
+            word.startsWith("www.") ||
+            /\.(com|app|dev|io|net|org)/.test(word);
+  
+          if (isLink) {
+            const url = word.startsWith("http")
+              ? word
+              : `https://${word}`;
+  
+            return (
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-400 underline hover:text-pink-300 cursor-pointer"
+              >
+                {word}{" "}
+              </a>
+            );
+          }
+  
+          return word + " ";
+        })}
+        <br />
+      </span>
+    ));
+  };
   React.useEffect(() => {
     const bg = new Image();
     bg.src = "/pfbg.png";
@@ -40,12 +73,16 @@ export default function Portfolio() {
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsProjectModalOpen(false);
+        if (selectedGalleryImage) {
+          setSelectedGalleryImage(null);
+        } else {
+          setIsProjectModalOpen(false);
+        }
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [selectedGalleryImage]);
 
   React.useEffect(() => {
     setActiveProjectIndex(0);
@@ -119,9 +156,9 @@ export default function Portfolio() {
 
               <div className="pixel-scroll mt-3 max-h-[220px] overflow-y-auto border border-purple-500/35 bg-black/55 px-3 py-3 pr-2">
                 <div className="border-b border-purple-500/30 pb-3 text-[16px] leading-tight md:text-[25px] text-white">
-                  <p>hello!! i&apos;m sam,</p>
+                  <p>hello!! i&apos;m Sam</p>
                   <p>21 Y.O</p>
-                  <p>i go by sxmimhd, full name is sami mahdadi</p>
+                  <p>i go by sxmimhd, full name is Sami Mahdadi</p>
                   <p>i create games of all kinds and genres</p>
                   <p>also i build web + ai stuff :3</p>
                 </div>
@@ -230,7 +267,11 @@ export default function Portfolio() {
                         <button
                           key={project.id}
                           type="button"
-                          onClick={() => setActiveProjectIndex(index)}
+                          onClick={() => {
+                            setActiveProjectIndex(index);
+                            setIsProjectModalOpen(true);
+                            setSelectedGalleryImage(null);
+                          }}
                           className={`group border p-1.5 text-left transition-all duration-300 ${
                             isActive
                               ? "translate-y-[-2px] border-pink-300 bg-pink-400/10 shadow-[0_0_14px_rgba(244,114,182,0.45)]"
@@ -254,7 +295,11 @@ export default function Portfolio() {
 
               <button
                 type="button"
-                onClick={() => activeProject && setIsProjectModalOpen(true)}
+                onClick={() => {
+                  if (!activeProject) return;
+                  setIsProjectModalOpen(true);
+                  setSelectedGalleryImage(null);
+                }}
                 className="border border-fuchsia-400/60 bg-black/70 p-2 text-left shadow-[0_0_18px_rgba(217,70,239,0.35)] transition hover:border-pink-300 hover:shadow-[0_0_24px_rgba(236,72,153,0.4)]"
               >
                 <img
@@ -262,7 +307,7 @@ export default function Portfolio() {
                   alt={activeProject?.name ?? "selected project"}
                   className="h-36 w-full border border-purple-400/50 object-cover"
                 />
-                <p className="mt-2 text-xs uppercase text-fuchsia-200">selected project (open)</p>
+                <p className="mt-2 text-xs uppercase text-fuchsia-200">selected project</p>
                 <h3 className="text-sm uppercase text-white md:text-base">{activeProject?.name}</h3>
                 <p className="mt-1 text-xs leading-snug text-purple-200">{activeProject?.summary}</p>
               </button>
@@ -282,7 +327,7 @@ export default function Portfolio() {
               <h3 className="text-xs uppercase text-pink-300 md:text-sm">studies + degrees</h3>
               <p className="mt-2 text-sm leading-relaxed text-purple-100/90">
                 i study software engineering with a focus on interactive media and game systems. i also completed
-                practical certifications in frontend development, ui/ux workflows, and 3d content pipelines.
+                practical certifications in frontend development, ui/ux workflows, and ai and python courses.
               </p>
             </div>
 
@@ -298,8 +343,8 @@ export default function Portfolio() {
           <div className="mt-3 border border-purple-500/35 bg-black/55 p-3">
             <h3 className="text-xs uppercase text-pink-300 md:text-sm">stack tech</h3>
             <p className="mt-2 text-sm leading-relaxed text-purple-100/90">
-              unity, blender, html, css, javascript, typescript, react, tailwind, vite, node tooling, git/github,
-              adobe photoshop, and adobe after effects.
+            Unity, Blender, Phaser.js, TypeScript, Tailwind CSS, Vite, Node.js, Express.js, Python, Tenserflow, Pytorch, PostgreSQL, Git, Docker, 
+               Figma, Adobe Photoshop, After Effects.
             </p>
           </div>
         </div>
@@ -313,18 +358,31 @@ export default function Portfolio() {
             </h2>
             <div className="flex flex-col gap-2">
               {[
-                { label: "github", value: "github.com/sxmimhd" },
-                { label: "linkedin", value: "linkedin.com/in/sami-mahdadi" },
-                { label: "email", value: "sami@lyxiastudio.com" },
-                { label: "discord", value: "sxmimhd" },
+                { label: "github", value: "github.com/sxmimhd", link: "https://github.com/sxmimhd" },
+                { label: "linkedin", value: "linkedin.com/in/samimahdadi", link: "https://linkedin.com/in/samimahdadi" },
+                { label: "email", value: "lyxiastudio@gmail.com", link: null },
+                { label: "discord", value: "sxmimhd", link: null },
               ].map((item) => (
                 <a
                   key={item.label}
-                  href="#"
-                  className="border border-purple-500/40 bg-black/55 p-2 transition hover:border-pink-400/80 hover:bg-purple-700/15"
+                  href={item.link || "#"}
+                  target={item.link ? "_blank" : undefined}
+                  rel={item.link ? "noopener noreferrer" : undefined}
+                  className="border border-purple-500/40 bg-black/55 p-2 transition 
+                            hover:border-pink-400/80 hover:bg-purple-700/15"
+                  onClick={(e) => {
+                    if (!item.link) {
+                      e.preventDefault();
+                      navigator.clipboard.writeText(item.value);
+                    }
+                  }}
                 >
-                  <p className="text-[10px] uppercase tracking-wide text-pink-300">{item.label}</p>
-                  <p className="mt-1 text-xs text-purple-100/95 md:text-sm">{item.value}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-pink-300">
+                    {item.label}
+                  </p>
+                  <p className="mt-1 text-xs text-purple-100/95 md:text-sm">
+                    {item.value}
+                  </p>
                 </a>
               ))}
             </div>
@@ -352,7 +410,10 @@ export default function Portfolio() {
       {isProjectModalOpen && activeProject && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-8 backdrop-blur-sm"
-          onClick={() => setIsProjectModalOpen(false)}
+          onClick={() => {
+            setSelectedGalleryImage(null);
+            setIsProjectModalOpen(false);
+          }}
         >
           <div
             className="w-[960px] max-h-[90vh] max-w-full overflow-y-auto border border-fuchsia-400/60 bg-[#090510] p-4 shadow-[0_0_34px_rgba(217,70,239,0.35)] md:p-5"
@@ -364,7 +425,10 @@ export default function Portfolio() {
               </h3>
               <button
                 type="button"
-                onClick={() => setIsProjectModalOpen(false)}
+                onClick={() => {
+                  setSelectedGalleryImage(null);
+                  setIsProjectModalOpen(false);
+                }}
                 className="border border-pink-400/70 bg-pink-500/20 px-2 py-0.5 text-xs uppercase text-pink-100 transition hover:bg-pink-500/35"
               >
                 close
@@ -381,24 +445,43 @@ export default function Portfolio() {
                 <p className="text-xs uppercase text-pink-300">bio</p>
                 <p className="mt-1 text-sm text-purple-100">{activeProject.summary}</p>
                 <p className="mt-3 text-xs uppercase text-pink-300">description</p>
-                <p className="mt-1 text-sm leading-relaxed text-purple-100/90">{activeProject.details}</p>
+                <p className="mt-1 text-sm leading-relaxed text-purple-100/90">{renderDetails(activeProject.details)}</p>
               </div>
             </div>
 
             <div className="mt-3 border border-purple-500/35 bg-black/45 p-3">
-              <p className="mb-2 text-xs uppercase tracking-widest text-fuchsia-300">gallery (5)</p>
+              <p className="mb-2 text-xs uppercase tracking-widest text-fuchsia-300">gallery</p>
               <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-                {activeProject.galleryImages.slice(0, 5).map((image, index) => (
-                  <img
+                {activeProject.galleryImages.slice(0, 10).map((image, index) => (
+                  <button
                     key={`${activeProject.id}-gallery-${index}`}
-                    src={image}
-                    alt={`${activeProject.name} gallery ${index + 1}`}
-                    className="h-24 w-full border border-purple-500/40 object-cover"
-                  />
+                    type="button"
+                    onClick={() => setSelectedGalleryImage(image)}
+                    className="transition hover:opacity-90"
+                  >
+                    <img
+                      src={image}
+                      alt={`${activeProject.name} gallery ${index + 1}`}
+                      className="h-24 w-full border border-purple-500/40 object-cover"
+                    />
+                  </button>
                 ))}
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {selectedGalleryImage && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 px-4 py-6"
+          onClick={() => setSelectedGalleryImage(null)}
+        >
+          <img
+            src={selectedGalleryImage}
+            alt="project preview"
+            className="max-h-[92vh] max-w-full border border-fuchsia-400/60 object-contain shadow-[0_0_26px_rgba(217,70,239,0.4)]"
+          />
         </div>
       )}
 
